@@ -52,10 +52,14 @@ jobs:
                 echo "Current directory: $(pwd)"
                 echo "listing contents:"
                 ls -la
+                ls -la ./swagger-bundle
+                ls -la ./docs-repo
 
 
             - name: Copy Swagger docs to docs-repo
-              run: cp -r ./swagger-bundle/* .docs-repo/docs/swagger
+              run: |
+                mkdir -p docs-repo/docs/swagger
+                cp -r ./swagger-bundle/* .docs-repo/docs/swagger
             
             - name: Commit and push changes
               run: |
