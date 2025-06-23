@@ -66,7 +66,7 @@ jobs:
                 cd docs-repo
                 git config user.name "github-actions"
                 git config user.email "actions@github.com"
-                git add swagger
+                git add docs/swagger
                 git commit -m "Update Swagger docs"
                 git push
 
