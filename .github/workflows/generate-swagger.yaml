@@ -46,9 +46,16 @@ jobs:
                 repository: "ashishDevv/docs-repo"
                 path: docs-repo
                 token: ${{secrets.DOCS_REPO_TOKEN}}
+            
+            - name: Debug current directory
+              run: |
+                echo "Current directory: $(pwd)"
+                echo "listing contents:"
+                ls -la
+
 
             - name: Copy Swagger docs to docs-repo
-              run: cp -r ./swagger-bundle/* ./docs/swagger
+              run: cp -r ./swagger-bundle/* .docs-repo/docs/swagger
             
             - name: Commit and push changes
               run: |
