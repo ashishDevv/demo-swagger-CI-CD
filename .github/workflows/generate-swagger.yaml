@@ -46,7 +46,7 @@ jobs:
                 token: ${{secrets.DOCS_REPO_TOKEN}}
 
             - name: Copy Swagger docs to docs-repo
-              run: cp -r ./swagger-bundle/* ./docs-repo/swagger
+              run: cp -r ./swagger-bundle/* ./docs/swagger
             
             - name: Commit and push changes
               run: |
