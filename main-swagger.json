@@ -1,0 +1,919 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the API documentation for Magic service.",
+        "title": "Magic Service API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "email": "tech@zeepty.com"
+        },
+        "version": "1.0"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/hook/instagram": {
+            "get": {
+                "description": "Handles the GET request from Instagram to verify the webhook URL during setup.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Hook"
+                ],
+                "summary": "Verify Instagram Webhook",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hub Mode (should be 'subscribe')",
+                        "name": "hub.mode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Verify Token configured in the Instagram App",
+                        "name": "hub.verify_token",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Challenge token to echo back",
+                        "name": "hub.challenge",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Challenge echoed back",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Receives Instagram webhook events and enqueues them for processing.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hook"
+                ],
+                "summary": "Instagram Webhook Receiver",
+                "parameters": [
+                    {
+                        "description": "Instagram Webhook Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hook.InstagramEventPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpx.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/link": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Validates a Zeepty magic link and returns the resolved listing ID and whether it's in the creator's store.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Link"
+                ],
+                "summary": "Validate a magic link",
+                "parameters": [
+                    {
+                        "description": "Request body containing the magic link",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/link.LinkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/link.LinkResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/magic": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a creator's magic-related store settings",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Magic"
+                ],
+                "summary": "Get magic settings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/magic.MagicSettings"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates a creator's magic-related store settings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Magic"
+                ],
+                "summary": "Update magic settings",
+                "parameters": [
+                    {
+                        "description": "Magic Settings Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/magic.MagicSettings"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/magic.UpdateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post": {
+            "get": {
+                "description": "Lists all posts. Optionally filter using `username` query param.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "List posts by creator",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username to filter posts",
+                        "name": "username",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/posts.PostResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "If `post_id` is provided, updates the existing post. Otherwise, creates a new post.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Create or update a post",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/posts.InitPostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.InitPostResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post/instagram": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the Instagram posts of a creator",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "List Instagram posts of a creator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Until",
+                        "name": "until",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.InstagramPostResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post/platform": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a post using platform_post_id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get a post by platform_post_id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Platform post id",
+                        "name": "platform_post_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.PostResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post/product": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of products associated with a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "List products linked to a post",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post id",
+                        "name": "post_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/posts.PostProductResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes existing products and adds new product links for the given post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Update products linked to a post",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/posts.UpdatePostProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.UpdateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post/publish": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Allows the creator to toggle the published status of a post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Publish or unpublish a post",
+                "parameters": [
+                    {
+                        "description": "Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/posts.PublishPostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.UpdateResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/post/{post_id}": {
+            "get": {
+                "description": "Retrieves a post and its associated products",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get a post by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Post ID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/posts.PostWithProductsResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "hook.Change": {
+            "type": "object",
+            "properties": {
+                "field": {
+                    "type": "string"
+                },
+                "value": {
+                    "$ref": "#/definitions/hook.Value"
+                }
+            }
+        },
+        "hook.Entry": {
+            "type": "object",
+            "properties": {
+                "changes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/hook.Change"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "integer"
+                }
+            }
+        },
+        "hook.From": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "hook.InstagramEventPayload": {
+            "type": "object",
+            "properties": {
+                "entry": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/hook.Entry"
+                    }
+                },
+                "object": {
+                    "type": "string"
+                }
+            }
+        },
+        "hook.Media": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "media_product_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "hook.Value": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "$ref": "#/definitions/hook.From"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "media": {
+                    "$ref": "#/definitions/hook.Media"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "httpx.APIResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "type": "string"
+                },
+                "pagination": {
+                    "$ref": "#/definitions/httpx.PaginationResponse"
+                }
+            }
+        },
+        "httpx.PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "is_paginated": {
+                    "type": "boolean"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "link.LinkRequest": {
+            "type": "object",
+            "required": [
+                "link"
+            ],
+            "properties": {
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "link.LinkResponse": {
+            "type": "object",
+            "properties": {
+                "in_store": {
+                    "type": "boolean"
+                },
+                "listing_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "magic.MagicSettings": {
+            "type": "object",
+            "required": [
+                "magic_comment_message",
+                "magic_comments",
+                "magic_keywords",
+                "magic_share",
+                "magic_story"
+            ],
+            "properties": {
+                "magic_comment_message": {
+                    "type": "string"
+                },
+                "magic_comments": {
+                    "type": "boolean"
+                },
+                "magic_keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "magic_share": {
+                    "type": "boolean"
+                },
+                "magic_story": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "magic.UpdateResponse": {
+            "type": "object",
+            "properties": {
+                "affected": {
+                    "type": "integer"
+                }
+            }
+        },
+        "posts.InitPostRequest": {
+            "type": "object",
+            "required": [
+                "platform",
+                "platform_post_id",
+                "thumbnail",
+                "title"
+            ],
+            "properties": {
+                "platform": {
+                    "description": "TODO: we should eventually move to a customer enum validator",
+                    "type": "string",
+                    "enum": [
+                        "instagram",
+                        "youtube",
+                        "zeepty"
+                    ]
+                },
+                "platform_post_id": {
+                    "description": "TODO: make this optional",
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "posts.InitPostResponse": {
+            "type": "object",
+            "properties": {
+                "affected": {
+                    "type": "integer"
+                },
+                "post_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "posts.InstagramPaging": {
+            "type": "object",
+            "properties": {
+                "next": {
+                    "type": "string"
+                },
+                "previous": {
+                    "type": "string"
+                }
+            }
+        },
+        "posts.InstagramPost": {
+            "type": "object",
+            "properties": {
+                "caption": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "media_type": {
+                    "type": "string"
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "posts.InstagramPostResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/posts.InstagramPost"
+                    }
+                },
+                "paging": {
+                    "$ref": "#/definitions/posts.InstagramPaging"
+                }
+            }
+        },
+        "posts.PostProduct": {
+            "type": "object",
+            "required": [
+                "product_link"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "product_link": {
+                    "type": "string"
+                }
+            }
+        },
+        "posts.PostProductResponse": {
+            "type": "object",
+            "properties": {
+                "brand_logo": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "brand_name": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "discount": {
+                    "type": "integer"
+                },
+                "mrp": {
+                    "type": "integer"
+                },
+                "post_product_id": {
+                    "type": "integer"
+                },
+                "primary_media_url": {
+                    "type": "string"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_link": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "zeepty_price": {
+                    "type": "integer"
+                }
+            }
+        },
+        "posts.PostResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "view_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "posts.PostWithProductsResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "platform_post_id": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/posts.PostProductResponse"
+                    }
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "view_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "posts.PublishPostRequest": {
+            "type": "object",
+            "required": [
+                "post_id"
+            ],
+            "properties": {
+                "post_id": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "posts.UpdatePostProductRequest": {
+            "type": "object",
+            "required": [
+                "post_id",
+                "products"
+            ],
+            "properties": {
+                "post_id": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/posts.PostProduct"
+                    }
+                }
+            }
+        },
+        "posts.UpdateResponse": {
+            "type": "object",
+            "properties": {
+                "affected": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
