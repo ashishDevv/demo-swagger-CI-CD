@@ -59,7 +59,7 @@ jobs:
             - name: Copy Swagger docs to docs-repo
               run: |
                 mkdir -p docs-repo/docs/swagger
-                cp -r ./swagger-bundle/* .docs-repo/docs/swagger
+                cp -r ./swagger-bundle/* docs-repo/docs/swagger
             
             - name: Commit and push changes
               run: |
